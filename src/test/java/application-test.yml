@@ -1,0 +1,6 @@
+app.github.username: [NAME]
+app.github.token: [TOKEN]
+
+mockserver:
+  enableCORSForAPI: true
+  enableCORSForAllResponses: true

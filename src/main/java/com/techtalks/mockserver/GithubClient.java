@@ -5,10 +5,12 @@ import com.techtalks.mockserver.payload.GithubRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunctions;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
 
 @Slf4j
@@ -38,7 +40,11 @@ public class GithubClient {
                 .uri("/user/repos?sort={sortField}&direction={sortDirection}",
                         "updated", "desc")
                 .exchange()
-                .flatMapMany(clientResponse -> clientResponse.bodyToFlux(GithubRepo.class));
+                .flatMapMany(clientResponse -> clientResponse.bodyToFlux(GithubRepo.class))
+                .doOnError(e -> Flux.just("Error " + e.getMessage())
+                        .flatMap(s -> ServerResponse.badRequest()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .syncBody(s)));
     }
 
     private ExchangeFilterFunction logRequest() {
